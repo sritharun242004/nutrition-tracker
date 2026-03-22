@@ -90,6 +90,27 @@
   {% block content %}{% endblock %}
 </main>
 
+<!-- Mobile Bottom Navigation (logged-in only) -->
+{% if current_user.is_authenticated %}
+<nav class="mobile-bottom-nav d-lg-none">
+  <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+    <i class="bi bi-speedometer2"></i><span>Home</span>
+  </a>
+  <a href="{{ url_for('history') }}" class="{% if request.endpoint == 'history' %}active{% endif %}">
+    <i class="bi bi-clock-history"></i><span>History</span>
+  </a>
+  <a href="{{ url_for('detect') }}" class="nav-log-btn">
+    <i class="bi bi-plus-lg"></i>
+  </a>
+  <a href="{{ url_for('recommend') }}" class="{% if request.endpoint == 'recommend' %}active{% endif %}">
+    <i class="bi bi-lightbulb"></i><span>Diet</span>
+  </a>
+  <a href="{{ url_for('disease_risk') }}" class="{% if request.endpoint == 'disease_risk' %}active{% endif %}">
+    <i class="bi bi-activity"></i><span>Risk</span>
+  </a>
+</nav>
+{% endif %}
+
 <!-- Footer -->
 <footer class="footer-custom mt-5 py-4">
   <div class="container">

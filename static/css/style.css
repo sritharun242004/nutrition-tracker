@@ -227,6 +227,103 @@ body {
   .hero-illustration i { font-size: 4rem; }
   .hero-section { min-height: auto; padding: 2rem 0; }
   .stat-card h3 { font-size: 1.5rem; }
+  .hero-section .display-4 { font-size: 1.6rem; }
+  .hero-section .lead { font-size: 0.9rem; }
+  .hero-section .btn-lg { padding: 0.5rem 1.2rem; font-size: 0.9rem; }
+  .container { padding-left: 12px; padding-right: 12px; }
+  .card-body.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .card-header.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+}
+
+/* ── Mobile Bottom Navigation ─────────────────────────────────────────────── */
+.mobile-bottom-nav {
+  display: none;
+}
+@media (max-width: 991px) {
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+    height: 60px;
+    align-items: stretch;
+  }
+  .mobile-bottom-nav a {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 9px;
+    font-weight: 600;
+    transition: color 0.15s;
+    padding: 6px 4px;
+  }
+  .mobile-bottom-nav a i { font-size: 1.2rem; line-height: 1; }
+  .mobile-bottom-nav a.active,
+  .mobile-bottom-nav a:hover { color: var(--primary); }
+  .mobile-bottom-nav a.nav-log-btn {
+    color: #fff;
+    background: var(--primary);
+    border-radius: 14px;
+    margin: 6px 4px;
+    flex: 0 0 56px;
+    width: 56px;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(99,102,241,0.4);
+  }
+  .mobile-bottom-nav a.nav-log-btn i { font-size: 1.4rem; }
+  /* Push page content above bottom nav */
+  body { padding-bottom: 68px; }
+  /* Hide navbar text on mobile, keep icons */
+  .navbar-collapse .nav-link span.nav-text { display: none; }
+}
+
+/* ── Mobile History Cards (replaces table on small screens) ───────────────── */
+.history-table-wrap { display: block; }
+.history-mobile-cards { display: none; }
+@media (max-width: 767px) {
+  .history-table-wrap { display: none !important; }
+  .history-mobile-cards { display: block; }
+  .history-food-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .history-food-card:last-child { border-bottom: none; }
+  .history-food-card .food-label { font-size: 0.875rem; font-weight: 600; }
+  .history-food-card .food-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+  .history-food-card .food-cal { font-size: 0.875rem; font-weight: 700; color: #f59e0b; }
+  /* Day header stats stack */
+  .day-stats-row { flex-wrap: wrap; gap: 8px !important; }
+  .day-stats-row .text-center { min-width: 48px; }
+}
+
+/* ── Dashboard mobile tweaks ──────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .dashboard-header { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+  .dashboard-header .btn { align-self: flex-start; }
+  .quick-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .quick-actions-grid .btn { font-size: 0.8rem; padding: 0.5rem 0.6rem; }
+  .stat-card { padding: 0.75rem !important; }
+  .stat-card h3 { font-size: 1.3rem; }
+}
+
+/* ── Touch-friendly buttons ───────────────────────────────────────────────── */
+@media (max-width: 991px) {
+  .btn { min-height: 40px; }
+  .btn-sm { min-height: 34px; }
+  .form-control, .form-select { min-height: 42px; font-size: 16px !important; }
 }
 
 /* ── Utility ──────────────────────────────────────────────────────────────── */

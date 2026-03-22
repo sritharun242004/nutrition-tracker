@@ -92,16 +92,16 @@ def register():
 
         if not all([username, email, password, confirm]):
             flash('Please fill all fields.', 'danger')
-            return render_template('register.html')
+            return render_template('register.html', form=request.form)
         if password != confirm:
             flash('Passwords do not match.', 'danger')
-            return render_template('register.html')
+            return render_template('register.html', form=request.form)
         if User.query.filter_by(email=email).first():
-            flash('Email already registered.', 'danger')
-            return render_template('register.html')
+            flash('That email is already registered. Please log in.', 'warning')
+            return redirect(url_for('login'))
         if User.query.filter_by(username=username).first():
-            flash('Username already taken.', 'danger')
-            return render_template('register.html')
+            flash('Username already taken. Please choose another.', 'danger')
+            return render_template('register.html', form=request.form)
 
         user = User(
             username=username,
@@ -530,6 +530,11 @@ def _seed_demo_user():
     print("[INFO] Demo user created → email: demo@foodhealth.com | password: demo123")
 
 
-if __name__ == '__main__':
+# Initialize DB on startup — runs for both `python app.py` and gunicorn
+try:
     create_tables()
+except Exception as _e:
+    print(f"[WARN] create_tables: {_e}")
+
+if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
