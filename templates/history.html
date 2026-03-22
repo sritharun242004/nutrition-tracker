@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Food History{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-clock-history text-info fs-3 me-3"></i>
+      <div>
+        <h4 class="fw-bold mb-0">Food Intake History</h4>
+        <p class="text-muted small mb-0">{{ total_logs }} entries in the last {{ days }} days</p>
+      </div>
+    </div>
+    <a href="{{ url_for('report') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-file-earmark-text me-1"></i>Generate Report
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3 px-4">
+      <form method="GET" class="row g-2 align-items-center">
+        <div class="col-auto">
+          <label class="form-label small fw-semibold mb-1">Time Range</label>
+          <select name="days" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="3" {% if days==3 %}selected{% endif %}>Last 3 Days</option>
+            <option value="7" {% if days==7 %}selected{% endif %}>Last 7 Days</option>
+            <option value="14" {% if days==14 %}selected{% endif %}>Last 14 Days</option>
+            <option value="30" {% if days==30 %}selected{% endif %}>Last 30 Days</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <label class="form-label small fw-semibold mb-1">Meal Type</label>
+          <select name="meal" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="all" {% if meal_filter=='all' %}selected{% endif %}>All Meals</option>
+            <option value="breakfast" {% if meal_filter=='breakfast' %}selected{% endif %}>Breakfast</option>
+            <option value="lunch" {% if meal_filter=='lunch' %}selected{% endif %}>Lunch</option>
+            <option value="dinner" {% if meal_filter=='dinner' %}selected{% endif %}>Dinner</option>
+            <option value="snack" {% if meal_filter=='snack' %}selected{% endif %}>Snack</option>
+          </select>
+        </div>
+        <div class="col-auto ms-auto align-self-end">
+          <a href="{{ url_for('detect') }}" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-circle me-1"></i>Log Food
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if grouped %}
+    {% for date_key, day_data in grouped.items()|sort(reverse=True) %}
+    <!-- Day Group -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0 pt-3 pb-2 px-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="fw-bold mb-0">{{ day_data.date }}</h6>
+            <small class="text-muted">{{ day_data.logs|length }} food entries</small>
+          </div>
+          <div class="d-flex gap-3 text-end">
+            <div class="text-center">
+              <div class="fw-bold text-warning small">{{ day_data.totals.calories|round|int }}</div>
+              <div class="text-muted" style="font-size:10px">Calories</div>
+            </div>
+            <div class="text-center">
+              <div class="fw-bold text-success small">{{ day_data.totals.protein }}g</div>
+              <div class="text-muted" style="font-size:10px">Protein</div>
+            </div>
+            <div class="text-center">
+              <div class="fw-bold text-primary small">{{ day_data.totals.carbs }}g</div>
+              <div class="text-muted" style="font-size:10px">Carbs</div>
+            </div>
+            <div class="text-center">
+              <div class="fw-bold text-danger small">{{ day_data.totals.fat }}g</div>
+              <div class="text-muted" style="font-size:10px">Fat</div>
+            </div>
+          </div>
+        </div>
+        <!-- Calorie Progress Bar -->
+        <div class="mt-2">
+          <div class="d-flex justify-content-between mb-1">
+            <small class="text-muted">Daily Calorie Target</small>
+            <small class="text-muted">{{ day_data.totals.calories|round|int }} / {{ daily_calories }} kcal</small>
+          </div>
+          <div class="progress" style="height:6px">
+            <div class="progress-bar {% if day_data.totals.calories > daily_calories %}bg-danger{% elif day_data.totals.calories > daily_calories * 0.8 %}bg-success{% else %}bg-warning{% endif %}"
+                 style="width:{{ [day_data.totals.calories / daily_calories * 100, 100]|min }}%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body px-4 py-2">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Food Item</th>
+                <th>Meal</th>
+                <th>Qty</th>
+                <th>Calories</th>
+                <th>Protein</th>
+                <th>Carbs</th>
+                <th>Fat</th>
+                <th>Time</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in day_data.logs %}
+              <tr>
+                <td>
+                  <span class="fw-semibold small">{{ log.food_name.title() }}</span>
+                </td>
+                <td><span class="badge bg-light text-dark">{{ log.meal_type.title() }}</span></td>
+                <td class="small text-muted">{{ log.quantity }}g</td>
+                <td class="fw-semibold text-warning small">{{ log.calories|round|int }}</td>
+                <td class="small text-success">{{ log.protein }}g</td>
+                <td class="small text-primary">{{ log.carbs }}g</td>
+                <td class="small text-danger">{{ log.fat }}g</td>
+                <td class="small text-muted">{{ log.date_logged.strftime('%I:%M %p') }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('delete_log', log_id=log.id) }}"
+                        onsubmit="return confirm('Delete this entry?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-journal-x display-2 text-muted opacity-25 mb-3 d-block"></i>
+        <h5 class="fw-semibold text-muted">No Food Logs Found</h5>
+        <p class="text-muted small">You haven't logged any food in the selected time range.</p>
+        <a href="{{ url_for('detect') }}" class="btn btn-primary mt-2">
+          <i class="bi bi-camera me-2"></i>Detect &amp; Log Your First Meal
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

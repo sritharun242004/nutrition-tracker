@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% block title %}Disease Risk Prediction{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4">
+    <i class="bi bi-activity text-danger fs-3 me-3"></i>
+    <div>
+      <h4 class="fw-bold mb-0">Disease Risk Prediction</h4>
+      <p class="text-muted small mb-0">AI-powered risk assessment for Diabetes, Obesity &amp; Hypertension</p>
+    </div>
+  </div>
+
+  <!-- Input Form -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+      <h6 class="fw-bold mb-0"><i class="bi bi-clipboard2-pulse me-2 text-primary"></i>Health Parameters</h6>
+    </div>
+    <div class="card-body px-4">
+      <form method="POST" action="{{ url_for('disease_risk') }}">
+        <div class="row g-3 align-items-end">
+          <div class="col-sm-4">
+            <label class="form-label fw-semibold small">Fasting Blood Sugar (mmol/L)</label>
+            <input type="number" name="blood_sugar" class="form-control" step="0.1"
+                   min="2" max="20" value="{{ blood_sugar }}" placeholder="Normal: 3.9-5.5">
+            <div class="form-text">Normal: 3.9–5.5 | Pre-diabetic: 5.6–7.0</div>
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label fw-semibold small">Systolic Blood Pressure (mmHg)</label>
+            <input type="number" name="systolic_bp" class="form-control"
+                   min="70" max="250" value="{{ systolic_bp }}" placeholder="Normal: 90-120">
+            <div class="form-text">Normal: &lt;120 | Elevated: 120–129</div>
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label fw-semibold small">Cholesterol (mmol/L)</label>
+            <input type="number" name="cholesterol" class="form-control" step="0.1"
+                   min="1" max="15" value="{{ cholesterol }}" placeholder="Normal: &lt;5.2">
+            <div class="form-text">Optimal: &lt;5.2 | Borderline: 5.2–6.2</div>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="bi bi-calculator me-2"></i>Assess Disease Risk
+            </button>
+            <small class="text-muted ms-3">Profile used: Age {{ current_user.age }} · BMI {{ current_user.bmi }} · {{ current_user.activity_level.title() }} activity</small>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if risk_results %}
+  <!-- Results -->
+  <div class="row g-4 mb-4">
+    {% for disease, result in risk_results.items() %}
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header border-0 pt-3 pb-0 px-4 bg-white">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-{% if disease == 'diabetes' %}droplet{% elif disease == 'obesity' %}person{% else %}heart-pulse{% endif %}-fill text-{{ result.risk_color }}"></i>
+            <h6 class="fw-bold mb-0 text-capitalize">{{ disease }}</h6>
+          </div>
+        </div>
+        <div class="card-body px-4">
+          <!-- Risk Gauge -->
+          <div class="text-center my-3">
+            <div class="risk-gauge mx-auto position-relative" style="width:120px;height:60px">
+              <canvas id="gauge_{{ disease }}" width="120" height="120"></canvas>
+            </div>
+            <div class="mt-2">
+              <span class="badge bg-{{ result.risk_color }} px-3 py-2 fs-6">{{ result.risk_level }} Risk</span>
+            </div>
+          </div>
+
+          <!-- Risk Score Bar -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <small class="text-muted">Risk Score</small>
+              <small class="fw-semibold">{{ result.risk_score }}/100</small>
+            </div>
+            <div class="progress" style="height:10px">
+              <div class="progress-bar bg-{{ result.risk_color }}" style="width:{{ result.risk_score }}%"></div>
+            </div>
+          </div>
+
+          <!-- Risk Factors -->
+          <div class="mb-3">
+            <p class="small fw-semibold text-muted mb-1">Key Risk Factors:</p>
+            <ul class="list-unstyled mb-0">
+              {% for factor in result.factors %}
+              <li class="small mb-1"><i class="bi bi-dot text-{{ result.risk_color }} fs-5 align-middle"></i>{{ factor }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Advice -->
+          <div class="bg-light rounded-3 p-3">
+            <p class="small fw-semibold mb-1"><i class="bi bi-lightbulb text-warning me-1"></i>Recommendations:</p>
+            <ul class="list-unstyled mb-0">
+              {% for advice in result.advice %}
+              <li class="small mb-1 text-muted"><i class="bi bi-arrow-right-short me-1"></i>{{ advice }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="alert alert-info border-0">
+    <i class="bi bi-info-circle-fill me-2"></i>
+    <strong>Important:</strong> These predictions are based on statistical models for educational purposes only. Always consult a qualified healthcare professional for medical advice and diagnosis.
+  </div>
+
+  {% else %}
+  <!-- Prompt to submit -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5">
+      <i class="bi bi-activity display-2 text-muted opacity-25 mb-3 d-block"></i>
+      <h5 class="fw-semibold text-muted">Enter Your Health Parameters</h5>
+      <p class="text-muted small">Fill in your blood sugar, blood pressure, and cholesterol values above, then click "Assess Disease Risk" to see your personalized risk report.</p>
+      <div class="row justify-content-center mt-4">
+        <div class="col-md-8">
+          <div class="row g-3 text-center">
+            <div class="col-4">
+              <div class="p-3 bg-success bg-opacity-10 rounded-3">
+                <i class="bi bi-shield-check-fill text-success fs-3 mb-1 d-block"></i>
+                <small class="fw-semibold text-success">Low Risk</small>
+                <div style="font-size:10px" class="text-muted">Healthy lifestyle maintained</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-3 bg-warning bg-opacity-10 rounded-3">
+                <i class="bi bi-exclamation-triangle-fill text-warning fs-3 mb-1 d-block"></i>
+                <small class="fw-semibold text-warning">Moderate Risk</small>
+                <div style="font-size:10px" class="text-muted">Some factors to monitor</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-3 bg-danger bg-opacity-10 rounded-3">
+                <i class="bi bi-exclamation-octagon-fill text-danger fs-3 mb-1 d-block"></i>
+                <small class="fw-semibold text-danger">High Risk</small>
+                <div style="font-size:10px" class="text-muted">Seek medical attention</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if risk_results %}
+<script>
+function drawGauge(canvasId, score, color) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 60, cy = 60, r = 45;
+
+  ctx.clearRect(0, 0, 120, 120);
+
+  // Background arc
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, 2 * Math.PI);
+  ctx.strokeStyle = '#e5e7eb';
+  ctx.lineWidth = 12;
+  ctx.stroke();
+
+  // Value arc
+  const angle = Math.PI + (score / 100) * Math.PI;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, angle);
+  const colors = { success: '#10b981', warning: '#f59e0b', danger: '#ef4444' };
+  ctx.strokeStyle = colors[color] || '#6366f1';
+  ctx.lineWidth = 12;
+  ctx.stroke();
+
+  // Score text
+  ctx.fillStyle = '#1f2937';
+  ctx.font = 'bold 18px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(score, cx, cy + 10);
+}
+
+{% for disease, result in risk_results.items() %}
+drawGauge('gauge_{{ disease }}', {{ result.risk_score }}, '{{ result.risk_color }}');
+{% endfor %}
+</script>
+{% endif %}
+{% endblock %}

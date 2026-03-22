@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% block title %}Diet Recommendations{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4">
+    <i class="bi bi-lightbulb-fill text-warning fs-3 me-3"></i>
+    <div>
+      <h4 class="fw-bold mb-0">Personalized Diet Plan</h4>
+      <p class="text-muted small mb-0">Based on your profile: {{ recs.goal }} · BMI {{ recs.bmi }} ({{ recs.bmi_category }})</p>
+    </div>
+    <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary btn-sm ms-auto">
+      <i class="bi bi-sliders me-1"></i>Update Profile
+    </a>
+  </div>
+
+  <!-- Overview Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card card border-0 shadow-sm p-3 text-center">
+        <i class="bi bi-fire text-warning fs-3 mb-1"></i>
+        <h3 class="fw-bold mb-0">{{ recs.daily_calories }}</h3>
+        <small class="text-muted">Daily Calories</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card card border-0 shadow-sm p-3 text-center">
+        <i class="bi bi-lightning-fill text-success fs-3 mb-1"></i>
+        <h3 class="fw-bold mb-0">{{ recs.macros.protein }}g</h3>
+        <small class="text-muted">Daily Protein</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card card border-0 shadow-sm p-3 text-center">
+        <i class="bi bi-droplet-fill text-info fs-3 mb-1"></i>
+        <h3 class="fw-bold mb-0">{{ recs.water_intake }}L</h3>
+        <small class="text-muted">Water Intake</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card card border-0 shadow-sm p-3 text-center">
+        <i class="bi bi-graph-up-arrow text-primary fs-3 mb-1"></i>
+        <h3 class="fw-bold mb-0">{{ recs.bmi }}</h3>
+        <small class="text-muted">Your BMI</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column -->
+    <div class="col-md-7">
+      <!-- Macronutrient Chart -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+          <h6 class="fw-bold mb-0"><i class="bi bi-pie-chart me-2 text-primary"></i>Macronutrient Distribution</h6>
+        </div>
+        <div class="card-body px-4">
+          <div class="row align-items-center">
+            <div class="col-md-5">
+              <canvas id="macroChart" height="200"></canvas>
+            </div>
+            <div class="col-md-7">
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="small fw-semibold"><span class="badge bg-success me-2">&nbsp;</span>Protein</span>
+                  <span class="small">{{ recs.macros.protein }}g ({{ recs.macros.protein_pct }}%)</span>
+                </div>
+                <div class="progress" style="height:8px">
+                  <div class="progress-bar bg-success" style="width:{{ recs.macros.protein_pct }}%"></div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="small fw-semibold"><span class="badge bg-primary me-2">&nbsp;</span>Carbohydrates</span>
+                  <span class="small">{{ recs.macros.carbs }}g ({{ recs.macros.carbs_pct }}%)</span>
+                </div>
+                <div class="progress" style="height:8px">
+                  <div class="progress-bar bg-primary" style="width:{{ recs.macros.carbs_pct }}%"></div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="small fw-semibold"><span class="badge bg-warning me-2">&nbsp;</span>Fat</span>
+                  <span class="small">{{ recs.macros.fat }}g ({{ recs.macros.fat_pct }}%)</span>
+                </div>
+                <div class="progress" style="height:8px">
+                  <div class="progress-bar bg-warning" style="width:{{ recs.macros.fat_pct }}%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="small fw-semibold"><span class="badge bg-info me-2">&nbsp;</span>Fiber</span>
+                  <span class="small">{{ recs.macros.fiber }}g/day</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Meal Plan -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+          <h6 class="fw-bold mb-0"><i class="bi bi-calendar3 me-2 text-success"></i>Sample Daily Meal Plan</h6>
+        </div>
+        <div class="card-body px-4">
+          <div class="accordion" id="mealPlanAccordion">
+            {% for meal_type, meal_options in recs.meal_plan.items() %}
+            <div class="accordion-item border-0 mb-2">
+              <h2 class="accordion-header">
+                <button class="accordion-button {% if not loop.first %}collapsed{% endif %} rounded-3 bg-light" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#meal{{ loop.index }}">
+                  <i class="bi bi-{% if meal_type == 'breakfast' %}sunrise{% elif meal_type == 'lunch' %}sun{% elif meal_type == 'dinner' %}moon-stars{% else %}cup-straw{% endif %} me-2 text-primary"></i>
+                  {{ meal_type.title() }}
+                </button>
+              </h2>
+              <div id="meal{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}">
+                <div class="accordion-body pt-2">
+                  <ul class="list-unstyled mb-0">
+                    {% for option in meal_options %}
+                    <li class="d-flex align-items-center py-1 border-bottom">
+                      <i class="bi bi-check-circle-fill text-success me-2 small"></i>
+                      <span class="small">{{ option }}</span>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-md-5">
+      <!-- Health Tips -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+          <h6 class="fw-bold mb-0"><i class="bi bi-stars me-2 text-warning"></i>Personalized Health Tips</h6>
+        </div>
+        <div class="card-body px-4">
+          {% for tip in recs.tips %}
+          <div class="d-flex align-items-start mb-3">
+            <i class="bi bi-check2-circle text-primary me-2 mt-1 flex-shrink-0"></i>
+            <p class="mb-0 small">{{ tip }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Recommended Foods -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+          <h6 class="fw-bold mb-0 text-success"><i class="bi bi-hand-thumbs-up me-2"></i>Eat More</h6>
+        </div>
+        <div class="card-body px-4">
+          <div class="row g-2">
+            {% for food in recs.recommended_foods %}
+            <div class="col-6">
+              <div class="food-rec-card p-2 rounded-3 bg-success bg-opacity-10 text-center">
+                <div class="fw-semibold small text-success">{{ food.name }}</div>
+                <div class="text-muted" style="font-size:10px">{{ food.calories }} cal · {{ food.protein }}g protein</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Avoid Foods -->
+      {% if recs.avoid_foods %}
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+          <h6 class="fw-bold mb-0 text-danger"><i class="bi bi-hand-thumbs-down me-2"></i>Limit These</h6>
+        </div>
+        <div class="card-body px-4">
+          <div class="row g-2">
+            {% for food in recs.avoid_foods %}
+            <div class="col-6">
+              <div class="food-rec-card p-2 rounded-3 bg-danger bg-opacity-10 text-center">
+                <div class="fw-semibold small text-danger">{{ food.name }}</div>
+                <div class="text-muted" style="font-size:10px">{{ food.calories }} cal</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+new Chart(document.getElementById('macroChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Protein', 'Carbs', 'Fat'],
+    datasets: [{
+      data: [{{ recs.macros.protein_pct }}, {{ recs.macros.carbs_pct }}, {{ recs.macros.fat_pct }}],
+      backgroundColor: ['#10b981', '#6366f1', '#f59e0b'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '65%',
+    plugins: { legend: { display: false } }
+  }
+});
+</script>
+{% endblock %}

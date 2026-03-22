@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-0">Good {% if now is defined %}{{ now }}{% else %}day{% endif %}, {{ current_user.username }}! 👋</h4>
+      <p class="text-muted small mb-0">Here's your health overview for today</p>
+    </div>
+    <a href="{{ url_for('detect') }}" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-2"></i>Log Food
+    </a>
+  </div>
+
+  <!-- Top Stats Cards -->
+  <div class="row g-3 mb-4">
+    <!-- BMI Card -->
+    <div class="col-6 col-md-3">
+      <div class="stat-card card border-0 shadow-sm h-100 p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div class="icon-badge bg-primary-light"><i class="bi bi-person-fill text-primary"></i></div>
+          <small class="text-muted fw-semibold">BMI</small>
+        </div>
+        <h3 class="fw-bold mb-0">{{ current_user.bmi }}</h3>
+        <span class="badge
+          {% if current_user.bmi < 18.5 %}bg-info
+          {% elif current_user.bmi < 25 %}bg-success
+          {% elif current_user.bmi < 30 %}bg-warning
+          {% else %}bg-danger{% endif %} mt-1">
+          {{ current_user.bmi_category }}
+        </span>
+      </div>
+    </div>
+    <!-- Calories Today -->
+    <div class="col-6 col-md-3">
+      <div class="stat-card card border-0 shadow-sm h-100 p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div class="icon-badge bg-warning-light"><i class="bi bi-fire text-warning"></i></div>
+          <small class="text-muted fw-semibold">Calories Today</small>
+        </div>
+        <h3 class="fw-bold mb-0">{{ today_analysis.total_calories|default(0) }}</h3>
+        <small class="text-muted">/ {{ daily_calories }} kcal target</small>
+        <div class="progress mt-2" style="height:4px">
+          <div class="progress-bar bg-warning" style="width: {{ [((today_analysis.total_calories|default(0)) / daily_calories * 100), 100]|min }}%"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Protein Today -->
+    <div class="col-6 col-md-3">
+      <div class="stat-card card border-0 shadow-sm h-100 p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div class="icon-badge bg-success-light"><i class="bi bi-lightning-fill text-success"></i></div>
+          <small class="text-muted fw-semibold">Protein Today</small>
+        </div>
+        <h3 class="fw-bold mb-0">{{ today_analysis.total_protein|default(0) }}g</h3>
+        <small class="text-muted">Daily protein intake</small>
+      </div>
+    </div>
+    <!-- Meals Logged -->
+    <div class="col-6 col-md-3">
+      <div class="stat-card card border-0 shadow-sm h-100 p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div class="icon-badge bg-info-light"><i class="bi bi-journal-check text-info"></i></div>
+          <small class="text-muted fw-semibold">Meals Logged</small>
+        </div>
+        <h3 class="fw-bold mb-0">{{ today_logs|length }}</h3>
+        <small class="text-muted">Today's entries</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts + Quick Info Row -->
+  <div class="row g-4 mb-4">
+    <!-- Calorie Chart -->
+    <div class="col-md-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0 pb-0 pt-3 px-4">
+          <h6 class="fw-bold mb-0">Calorie Intake — Last 7 Days</h6>
+        </div>
+        <div class="card-body px-4">
+          <canvas id="calorieChart" height="180"></canvas>
+        </div>
+      </div>
+    </div>
+    <!-- Today Macros + Status -->
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0 pb-0 pt-3 px-4">
+          <h6 class="fw-bold mb-0">Today's Macros</h6>
+        </div>
+        <div class="card-body px-4">
+          {% if today_analysis.total_calories %}
+            <canvas id="macroChart" height="180"></canvas>
+          {% else %}
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-journal-plus display-4 mb-2 d-block opacity-25"></i>
+              <p class="small">No food logged yet today.<br>
+              <a href="{{ url_for('detect') }}" class="text-primary">Log your first meal</a></p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Banner -->
+  {% if today_analysis.status %}
+  <div class="alert alert-{% if today_analysis.status == 'on track' %}success{% elif today_analysis.status == 'over target' %}warning{% else %}info{% endif %} border-0 mb-4">
+    <i class="bi bi-{% if today_analysis.status == 'on track' %}check-circle{% elif today_analysis.status == 'over target' %}exclamation-triangle{% else %}info-circle{% endif %}-fill me-2"></i>
+    {% if today_analysis.status == 'on track' %}
+      Great job! You're on track with your calorie goal today.
+    {% elif today_analysis.status == 'over target' %}
+      You've exceeded your daily calorie target by {{ today_analysis.calorie_diff }} kcal.
+    {% else %}
+      You still have {{ today_analysis.remaining_calories }} kcal remaining for today.
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Recent Logs + Quick Actions -->
+  <div class="row g-4">
+    <!-- Recent Food Logs -->
+    <div class="col-md-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pb-0 pt-3 px-4 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0">Recent Food Logs</h6>
+          <a href="{{ url_for('history') }}" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="card-body px-4">
+          {% if recent_logs %}
+            {% for log in recent_logs %}
+            <div class="d-flex align-items-center py-2 border-bottom">
+              <div class="food-icon-sm me-3">
+                <i class="bi bi-egg-fried text-warning"></i>
+              </div>
+              <div class="flex-grow-1">
+                <span class="fw-semibold small">{{ log.food_name.title() }}</span>
+                <span class="badge bg-light text-muted ms-2 small">{{ log.meal_type }}</span>
+                <div class="text-muted" style="font-size:11px">{{ log.quantity }}g · {{ log.date_logged.strftime('%b %d, %I:%M %p') }}</div>
+              </div>
+              <div class="text-end">
+                <span class="fw-bold text-warning small">{{ log.calories|round|int }} kcal</span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center py-3 text-muted">
+              <i class="bi bi-journal-x fs-3 d-block mb-2 opacity-25"></i>
+              <small>No food logged yet. <a href="{{ url_for('detect') }}">Detect food</a></small>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0 pb-0 pt-3 px-4">
+          <h6 class="fw-bold mb-0">Quick Actions</h6>
+        </div>
+        <div class="card-body px-4">
+          <div class="d-grid gap-2">
+            <a href="{{ url_for('detect') }}" class="btn btn-outline-primary text-start">
+              <i class="bi bi-camera me-2"></i>Detect &amp; Log Food
+            </a>
+            <a href="{{ url_for('recommend') }}" class="btn btn-outline-success text-start">
+              <i class="bi bi-lightbulb me-2"></i>Get Diet Recommendations
+            </a>
+            <a href="{{ url_for('disease_risk') }}" class="btn btn-outline-warning text-start">
+              <i class="bi bi-activity me-2"></i>Check Disease Risk
+            </a>
+            <a href="{{ url_for('history') }}" class="btn btn-outline-info text-start">
+              <i class="bi bi-clock-history me-2"></i>View Food History
+            </a>
+            <a href="{{ url_for('report') }}" class="btn btn-outline-secondary text-start">
+              <i class="bi bi-file-earmark-text me-2"></i>Generate Report
+            </a>
+            <a href="{{ url_for('profile') }}" class="btn btn-outline-dark text-start">
+              <i class="bi bi-sliders me-2"></i>Update Profile
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Calorie chart
+const calLabels = {{ cal_labels|safe }};
+const calData = {{ cal_data|safe }};
+const targetLine = Array(calLabels.length).fill({{ daily_calories }});
+
+new Chart(document.getElementById('calorieChart'), {
+  type: 'bar',
+  data: {
+    labels: calLabels,
+    datasets: [
+      {
+        label: 'Calories',
+        data: calData,
+        backgroundColor: 'rgba(99, 102, 241, 0.7)',
+        borderRadius: 6,
+      },
+      {
+        label: 'Target',
+        data: targetLine,
+        type: 'line',
+        borderColor: '#f59e0b',
+        borderWidth: 2,
+        borderDash: [5,5],
+        pointRadius: 0,
+        fill: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: true, position: 'top' } },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+
+{% if today_analysis.total_calories %}
+// Macro pie chart
+new Chart(document.getElementById('macroChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Protein', 'Carbs', 'Fat'],
+    datasets: [{
+      data: [
+        {{ today_analysis.total_protein|default(0) }},
+        {{ today_analysis.total_carbs|default(0) }},
+        {{ today_analysis.total_fat|default(0) }}
+      ],
+      backgroundColor: ['#10b981', '#6366f1', '#f59e0b'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '65%',
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+{% endif %}
+</script>
+{% endblock %}

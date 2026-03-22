@@ -1,0 +1,13 @@
+__pycache__/
+*.cpython-*.pyc
+*.pyc
+*.pyo
+*.pyd
+.env
+food_health.db
+uploads/*
+!uploads/.gitkeep
+models/saved/
+test_images/
+.DS_Store
+*.log

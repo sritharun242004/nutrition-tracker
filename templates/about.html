@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Hero -->
+  <div class="text-center mb-5">
+    <i class="bi bi-heart-pulse-fill text-primary display-4 mb-3 d-block"></i>
+    <h2 class="fw-bold">About FoodHealth AI</h2>
+    <p class="text-muted lead">An AI-powered food detection and health analysis system</p>
+    <span class="badge bg-primary px-3 py-2">Final Year Project — 2024</span>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <!-- Project Description -->
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2 text-primary"></i>Project Overview</h5>
+          <p>
+            <strong>FoodHealth AI</strong> is a comprehensive web-based application designed to help individuals
+            monitor their food intake, understand nutritional values, and receive personalized health recommendations.
+            The system combines artificial intelligence, machine learning, and modern web technologies to deliver
+            a complete dietary and health management platform.
+          </p>
+          <p>
+            The project was built as part of our final year Computer Science curriculum to demonstrate the
+            practical application of AI and machine learning in healthcare and daily lifestyle management.
+          </p>
+
+          <h6 class="fw-bold mt-4 mb-3">Key Features</h6>
+          <div class="row g-2">
+            {% for feature in [
+              ('camera', 'Food Image Detection', 'Upload food photos for AI-powered identification and nutritional analysis'),
+              ('bar-chart-line', 'Nutritional Analysis', 'Get detailed macronutrient breakdown per 100g and per serving'),
+              ('person-check', 'Personalized Recommendations', 'Diet plans tailored to your BMI, age, and health goals'),
+              ('activity', 'Disease Risk Prediction', 'ML-based risk assessment for diabetes, obesity, and hypertension'),
+              ('clock-history', 'Food Intake History', 'Track and monitor all meals with trend analysis'),
+              ('file-earmark-text', 'Health Reports', 'Generate printable 30-day health summary reports')
+            ] %}
+            <div class="col-sm-6">
+              <div class="d-flex align-items-start gap-2 p-2">
+                <i class="bi bi-{{ feature[0] }}-fill text-primary mt-1 flex-shrink-0"></i>
+                <div>
+                  <div class="small fw-semibold">{{ feature[1] }}</div>
+                  <div class="text-muted" style="font-size:11px">{{ feature[2] }}</div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-tools me-2 text-success"></i>Technologies Used</h5>
+          <div class="mb-3">
+            <h6 class="fw-semibold text-muted small text-uppercase">Backend</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-success px-2 py-1">Python 3.x</span>
+              <span class="badge bg-success px-2 py-1">Flask</span>
+              <span class="badge bg-success px-2 py-1">SQLAlchemy</span>
+              <span class="badge bg-success px-2 py-1">SQLite</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <h6 class="fw-semibold text-muted small text-uppercase">Machine Learning</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-warning text-dark px-2 py-1">TensorFlow</span>
+              <span class="badge bg-warning text-dark px-2 py-1">Scikit-learn</span>
+              <span class="badge bg-warning text-dark px-2 py-1">MobileNetV2</span>
+              <span class="badge bg-warning text-dark px-2 py-1">NumPy</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <h6 class="fw-semibold text-muted small text-uppercase">Frontend</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-primary px-2 py-1">HTML5</span>
+              <span class="badge bg-primary px-2 py-1">Bootstrap 5</span>
+              <span class="badge bg-primary px-2 py-1">Chart.js</span>
+              <span class="badge bg-primary px-2 py-1">JavaScript</span>
+            </div>
+          </div>
+          <div>
+            <h6 class="fw-semibold text-muted small text-uppercase">Tools</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-secondary px-2 py-1">Git</span>
+              <span class="badge bg-secondary px-2 py-1">VS Code</span>
+              <span class="badge bg-secondary px-2 py-1">Pillow</span>
+              <span class="badge bg-secondary px-2 py-1">Pandas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Section -->
+  <div class="mb-5">
+    <h5 class="fw-bold text-center mb-4"><i class="bi bi-people me-2 text-primary"></i>Project Team</h5>
+    <div class="row justify-content-center g-4">
+      {% for member in [
+        ('Project Lead', 'Full Stack Development &amp; AI/ML Integration', 'person-badge'),
+        ('ML Developer', 'Disease Risk Prediction Models &amp; Food Detection', 'cpu'),
+        ('Frontend Dev', 'UI/UX Design &amp; Dashboard Development', 'laptop'),
+        ('Data Analyst', 'Nutritional Database &amp; Recommendation System', 'graph-up'),
+      ] %}
+      <div class="col-sm-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center p-4">
+          <div class="team-avatar mx-auto mb-3">
+            <i class="bi bi-{{ member[2] }} text-primary fs-2"></i>
+          </div>
+          <h6 class="fw-bold mb-1">{{ member[0] }}</h6>
+          <p class="text-muted small mb-0">{{ member[1] }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <div class="card border-0 shadow-sm mb-5">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-4"><i class="bi bi-diagram-3 me-2 text-primary"></i>System Architecture</h5>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="text-center p-3">
+            <div class="step-circle bg-primary text-white mx-auto mb-2">1</div>
+            <h6 class="fw-semibold">Input Layer</h6>
+            <p class="text-muted small">User uploads food image or searches by name. Profile data includes age, weight, height, and health goals.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-center p-3">
+            <div class="step-circle bg-primary text-white mx-auto mb-2">2</div>
+            <h6 class="fw-semibold">Processing Layer</h6>
+            <p class="text-muted small">MobileNetV2 classifies food images. Rule-based + ML algorithms compute recommendations and disease risks.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-center p-3">
+            <div class="step-circle bg-primary text-white mx-auto mb-2">3</div>
+            <h6 class="fw-semibold">Output Layer</h6>
+            <p class="text-muted small">Nutritional values, personalized diet plans, risk scores, and comprehensive health reports are displayed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center text-muted small">
+    <p>FoodHealth AI — Built with ❤ for better health awareness | Final Year Project 2024</p>
+  </div>
+</div>
+{% endblock %}

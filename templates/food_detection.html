@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% block title %}Food Detection{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4">
+    <i class="bi bi-camera-fill text-primary fs-3 me-3"></i>
+    <div>
+      <h4 class="fw-bold mb-0">Food Detection</h4>
+      <p class="text-muted small mb-0">Upload a food image or search manually to get nutritional information</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Upload & Search Column -->
+    <div class="col-md-5">
+      <!-- Image Upload -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+          <h6 class="fw-bold mb-0"><i class="bi bi-image me-2 text-primary"></i>Upload Food Image</h6>
+        </div>
+        <div class="card-body px-4">
+          <form method="POST" enctype="multipart/form-data" id="imageForm">
+            <div class="upload-area text-center p-4 rounded-3 border-dashed mb-3" id="dropZone"
+                 onclick="document.getElementById('foodImage').click()">
+              <i class="bi bi-cloud-upload fs-1 text-muted mb-2 d-block"></i>
+              <p class="text-muted small mb-1">Click to upload or drag &amp; drop</p>
+              <p class="text-muted" style="font-size:11px">PNG, JPG, JPEG (max 16MB)</p>
+              <img id="imagePreview" src="#" alt="Preview" class="img-fluid rounded mt-2 d-none" style="max-height:180px">
+            </div>
+            <input type="file" name="food_image" id="foodImage" class="d-none" accept="image/*" onchange="previewImage(this)">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="bi bi-magic me-2"></i>Detect Food
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Manual Search -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+          <h6 class="fw-bold mb-0"><i class="bi bi-search me-2 text-success"></i>Search by Food Name</h6>
+        </div>
+        <div class="card-body px-4">
+          <form method="POST">
+            <div class="mb-3">
+              <input type="text" name="manual_food" class="form-control" placeholder="e.g. pizza, banana, rice..."
+                     list="foodSuggestions" autocomplete="off">
+              <datalist id="foodSuggestions">
+                {% for food in all_foods %}
+                  <option value="{{ food }}">{{ food.title() }}</option>
+                {% endfor %}
+              </datalist>
+              <div class="form-text">Type to search from {{ all_foods|length }} food items</div>
+            </div>
+            <button type="submit" class="btn btn-success w-100">
+              <i class="bi bi-search me-2"></i>Get Nutrition Info
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Column -->
+    <div class="col-md-7">
+      {% if result %}
+        <!-- Detection Result -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header border-0 pt-3 pb-0 px-4
+            {% if result.success %}bg-success bg-opacity-10{% else %}bg-warning bg-opacity-10{% endif %}">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-{% if result.success %}check-circle-fill text-success{% else %}exclamation-triangle-fill text-warning{% endif %}"></i>
+              <h6 class="fw-bold mb-0">
+                {% if result.success %}
+                  Detected: {{ result.food_name }}
+                  {% if result.confidence %}<span class="text-muted fw-normal small">({{ result.confidence }}% confidence)</span>{% endif %}
+                {% else %}
+                  {{ result.message|default('Food not recognized') }}
+                {% endif %}
+              </h6>
+            </div>
+            {% if result.get('demo_mode') %}
+              <small class="text-warning d-block mt-1"><i class="bi bi-info-circle me-1"></i>Demo mode — Install TensorFlow for real detection</small>
+            {% endif %}
+          </div>
+
+          {% if result.success and result.nutrition %}
+          <div class="card-body px-4">
+            <!-- Image Preview if available -->
+            {% if result.get('image_path') %}
+              <img src="{{ result.image_path }}" class="img-fluid rounded mb-3 d-block mx-auto" style="max-height:180px" alt="Food image">
+            {% endif %}
+
+            <!-- Nutrition Highlights -->
+            <div class="row g-2 mb-3">
+              <div class="col-6 col-sm-3">
+                <div class="nutrition-badge text-center p-2 rounded-3 bg-warning bg-opacity-15">
+                  <div class="fw-bold text-warning">{{ result.nutrition.calories }}</div>
+                  <small class="text-muted">Calories</small>
+                </div>
+              </div>
+              <div class="col-6 col-sm-3">
+                <div class="nutrition-badge text-center p-2 rounded-3 bg-success bg-opacity-15">
+                  <div class="fw-bold text-success">{{ result.nutrition.protein }}g</div>
+                  <small class="text-muted">Protein</small>
+                </div>
+              </div>
+              <div class="col-6 col-sm-3">
+                <div class="nutrition-badge text-center p-2 rounded-3 bg-primary bg-opacity-15">
+                  <div class="fw-bold text-primary">{{ result.nutrition.carbs }}g</div>
+                  <small class="text-muted">Carbs</small>
+                </div>
+              </div>
+              <div class="col-6 col-sm-3">
+                <div class="nutrition-badge text-center p-2 rounded-3 bg-danger bg-opacity-15">
+                  <div class="fw-bold text-danger">{{ result.nutrition.fat }}g</div>
+                  <small class="text-muted">Fat</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Full Nutrition Table -->
+            <div class="table-responsive mb-3">
+              <table class="table table-sm table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Nutrient</th>
+                    <th>Per 100g</th>
+                    <th>% Daily Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Calories</td><td>{{ result.nutrition.calories }} kcal</td><td>—</td></tr>
+                  <tr><td>Protein</td><td>{{ result.nutrition.protein }}g</td><td>{{ (result.nutrition.protein / 50 * 100)|round|int }}%</td></tr>
+                  <tr><td>Carbohydrates</td><td>{{ result.nutrition.carbs }}g</td><td>{{ (result.nutrition.carbs / 300 * 100)|round|int }}%</td></tr>
+                  <tr><td>Total Fat</td><td>{{ result.nutrition.fat }}g</td><td>{{ (result.nutrition.fat / 65 * 100)|round|int }}%</td></tr>
+                  <tr><td>Dietary Fiber</td><td>{{ result.nutrition.fiber }}g</td><td>{{ (result.nutrition.fiber / 25 * 100)|round|int }}%</td></tr>
+                  <tr><td>Sugar</td><td>{{ result.nutrition.sugar }}g</td><td>{{ (result.nutrition.sugar / 50 * 100)|round|int }}%</td></tr>
+                  <tr><td>Sodium</td><td>{{ result.nutrition.sodium }}mg</td><td>{{ (result.nutrition.sodium / 2300 * 100)|round|int }}%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Values per 100g · Serving size: {{ result.nutrition.get('serving', '100g') }}</small>
+
+            <!-- Log Food Form -->
+            <hr class="mt-3 mb-3">
+            <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle me-2 text-primary"></i>Log This Food</h6>
+            <form method="POST" action="{{ url_for('log_food') }}">
+              <input type="hidden" name="food_name" value="{{ result.food_name.lower() }}">
+              <input type="hidden" name="image_path" value="{{ result.get('image_path', '') }}">
+              <div class="row g-2">
+                <div class="col-sm-4">
+                  <label class="form-label small fw-semibold">Quantity (grams)</label>
+                  <input type="number" name="quantity" class="form-control form-control-sm" value="100" min="1" max="2000">
+                </div>
+                <div class="col-sm-4">
+                  <label class="form-label small fw-semibold">Meal Type</label>
+                  <select name="meal_type" class="form-select form-select-sm">
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="snack">Snack</option>
+                    <option value="meal" selected>General Meal</option>
+                  </select>
+                </div>
+                <div class="col-sm-4 d-flex align-items-end">
+                  <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-journal-plus me-1"></i>Log Food
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Prediction alternatives -->
+        {% if result.get('all_predictions') %}
+        <div class="card border-0 shadow-sm">
+          <div class="card-body px-4 py-3">
+            <h6 class="fw-semibold mb-2 small text-muted">Top Predictions</h6>
+            {% for pred in result.all_predictions %}
+            <div class="d-flex align-items-center mb-2">
+              <span class="small me-2 flex-grow-1">{{ pred.label }}</span>
+              <div class="progress flex-grow-1 me-2" style="height:6px;max-width:120px">
+                <div class="progress-bar" style="width:{{ pred.confidence }}%"></div>
+              </div>
+              <small class="text-muted">{{ pred.confidence }}%</small>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+      {% else %}
+        <!-- Placeholder -->
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center py-5">
+            <i class="bi bi-camera display-2 text-muted opacity-25 mb-3 d-block"></i>
+            <h5 class="fw-semibold text-muted">Ready to Detect Food</h5>
+            <p class="text-muted small">Upload a food image or search by name to see nutritional information and log your meal.</p>
+            <div class="row justify-content-center g-2 mt-3">
+              {% for food in ['Pizza', 'Banana', 'Broccoli', 'Chicken Breast', 'Rice', 'Salad'] %}
+              <div class="col-auto">
+                <form method="POST" class="d-inline">
+                  <button type="submit" name="manual_food" value="{{ food.lower() }}" class="btn btn-sm btn-outline-secondary">
+                    {{ food }}
+                  </button>
+                </form>
+              </div>
+              {% endfor %}
+            </div>
+            <p class="text-muted mt-3" style="font-size:11px">Quick search examples above</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const preview = document.getElementById('imagePreview');
+      preview.src = e.target.result;
+      preview.classList.remove('d-none');
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Drag and drop
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  const fileInput = document.getElementById('foodImage');
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  fileInput.files = dt.files;
+  previewImage(fileInput);
+});
+</script>
+{% endblock %}

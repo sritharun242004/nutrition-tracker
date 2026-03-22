@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="d-flex align-items-center mb-4">
+        <i class="bi bi-person-gear text-primary fs-3 me-3"></i>
+        <div>
+          <h4 class="fw-bold mb-0">Edit Profile</h4>
+          <p class="text-muted small mb-0">Update your health details for better recommendations</p>
+        </div>
+      </div>
+
+      <!-- Current Stats -->
+      <div class="row g-3 mb-4">
+        <div class="col-4">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <h4 class="fw-bold text-primary mb-0">{{ current_user.bmi }}</h4>
+            <small class="text-muted">Current BMI</small>
+            <div><span class="badge bg-{% if current_user.bmi < 18.5 %}info{% elif current_user.bmi < 25 %}success{% elif current_user.bmi < 30 %}warning{% else %}danger{% endif %}">{{ current_user.bmi_category }}</span></div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <h4 class="fw-bold text-warning mb-0">{{ current_user.daily_calorie_need() }}</h4>
+            <small class="text-muted">Daily Calories</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card border-0 shadow-sm p-3 text-center">
+            <h4 class="fw-bold text-success mb-0">{{ current_user.health_goal.replace('_', ' ').title() }}</h4>
+            <small class="text-muted">Health Goal</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <form method="POST" action="{{ url_for('profile') }}">
+            <div class="row g-3">
+              <div class="col-sm-4">
+                <label class="form-label fw-semibold">Age (years)</label>
+                <input type="number" name="age" class="form-control" value="{{ current_user.age }}" min="10" max="100" required>
+              </div>
+              <div class="col-sm-4">
+                <label class="form-label fw-semibold">Weight (kg)</label>
+                <input type="number" name="weight" class="form-control" value="{{ current_user.weight }}" step="0.1" min="20" max="300" required>
+              </div>
+              <div class="col-sm-4">
+                <label class="form-label fw-semibold">Height (cm)</label>
+                <input type="number" name="height" class="form-control" value="{{ current_user.height }}" min="100" max="250" required>
+              </div>
+              <div class="col-sm-4">
+                <label class="form-label fw-semibold">Gender</label>
+                <select name="gender" class="form-select">
+                  <option value="male" {% if current_user.gender == 'male' %}selected{% endif %}>Male</option>
+                  <option value="female" {% if current_user.gender == 'female' %}selected{% endif %}>Female</option>
+                </select>
+              </div>
+              <div class="col-sm-4">
+                <label class="form-label fw-semibold">Activity Level</label>
+                <select name="activity_level" class="form-select">
+                  {% for level in ['sedentary', 'light', 'moderate', 'active', 'very_active'] %}
+                  <option value="{{ level }}" {% if current_user.activity_level == level %}selected{% endif %}>
+                    {{ level.replace('_', ' ').title() }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-sm-4">
+                <label class="form-label fw-semibold">Health Goal</label>
+                <select name="health_goal" class="form-select">
+                  {% for goal, label in [('maintenance','Maintain Weight'),('weight_loss','Lose Weight'),('muscle_gain','Build Muscle'),('diabetes_management','Manage Diabetes'),('heart_health','Heart Health')] %}
+                  <option value="{{ goal }}" {% if current_user.health_goal == goal %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Medical Conditions</label>
+                <input type="text" name="medical_conditions" class="form-control"
+                       value="{{ current_user.medical_conditions }}"
+                       placeholder="e.g. diabetes, hypertension, none">
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary px-4">
+                  <i class="bi bi-check-circle me-2"></i>Save Profile
+                </button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary ms-2">Cancel</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

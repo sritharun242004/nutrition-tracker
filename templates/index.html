@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-white py-5">
+  <div class="container py-4">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="badge bg-white text-primary fw-semibold mb-3 px-3 py-2">AI-Powered Health Analysis</span>
+        <h1 class="display-4 fw-bold mb-3">Food Detection &amp;<br>Health Analysis</h1>
+        <p class="lead mb-4 opacity-90">Upload a food image, get instant nutritional insights, personalized diet plans, and disease risk predictions — all in one platform.</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="{{ url_for('register') }}" class="btn btn-white-custom btn-lg px-4 fw-semibold">
+            <i class="bi bi-person-plus me-2"></i>Get Started Free
+          </a>
+          <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center">
+        <div class="hero-illustration">
+          <i class="bi bi-heart-pulse display-1 opacity-75"></i>
+          <div class="mt-2 d-flex flex-wrap gap-2 justify-content-center">
+            <span class="hero-badge"><i class="bi bi-camera me-1"></i>Food Detection</span>
+            <span class="hero-badge"><i class="bi bi-graph-up me-1"></i>BMI Analysis</span>
+            <span class="hero-badge"><i class="bi bi-shield-check me-1"></i>Risk Prediction</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section py-4 bg-white shadow-sm">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <h3 class="fw-bold text-primary mb-0">50+</h3>
+          <small class="text-muted">Food Database Items</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <h3 class="fw-bold text-primary mb-0">3</h3>
+          <small class="text-muted">Disease Risk Models</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <h3 class="fw-bold text-primary mb-0">AI</h3>
+          <small class="text-muted">Powered Detection</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <h3 class="fw-bold text-primary mb-0">100%</h3>
+          <small class="text-muted">Personalized Plans</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">Everything You Need for Better Health</h2>
+      <p class="text-muted">Comprehensive tools for food tracking and health management</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="feature-card card h-100 border-0 shadow-sm p-4 text-center">
+          <div class="feature-icon bg-primary-light rounded-circle mx-auto mb-3">
+            <i class="bi bi-camera-fill text-primary fs-3"></i>
+          </div>
+          <h5 class="fw-bold">Food Image Detection</h5>
+          <p class="text-muted small">Upload any food photo and our AI instantly identifies it and provides detailed nutritional information including calories, protein, carbs, fat, and more.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card card h-100 border-0 shadow-sm p-4 text-center">
+          <div class="feature-icon bg-success-light rounded-circle mx-auto mb-3">
+            <i class="bi bi-person-check-fill text-success fs-3"></i>
+          </div>
+          <h5 class="fw-bold">Personalized Diet Plans</h5>
+          <p class="text-muted small">Get tailored recommendations based on your age, weight, height, BMI, and health goals — whether it's weight loss, muscle gain, or managing a health condition.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card card h-100 border-0 shadow-sm p-4 text-center">
+          <div class="feature-icon bg-warning-light rounded-circle mx-auto mb-3">
+            <i class="bi bi-activity text-warning fs-3"></i>
+          </div>
+          <h5 class="fw-bold">Disease Risk Prediction</h5>
+          <p class="text-muted small">Assess your risk for diabetes, obesity, and hypertension using machine learning models trained on medical data. Get actionable health advice.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card card h-100 border-0 shadow-sm p-4 text-center">
+          <div class="feature-icon bg-info-light rounded-circle mx-auto mb-3">
+            <i class="bi bi-clock-history text-info fs-3"></i>
+          </div>
+          <h5 class="fw-bold">Food Intake History</h5>
+          <p class="text-muted small">Track every meal, monitor daily calorie and macronutrient intake, and view trends over time with interactive charts.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card card h-100 border-0 shadow-sm p-4 text-center">
+          <div class="feature-icon bg-danger-light rounded-circle mx-auto mb-3">
+            <i class="bi bi-file-earmark-bar-graph-fill text-danger fs-3"></i>
+          </div>
+          <h5 class="fw-bold">Structured Health Reports</h5>
+          <p class="text-muted small">Generate comprehensive monthly health reports summarizing your nutrition, BMI trends, disease risks, and personalized recommendations.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card card h-100 border-0 shadow-sm p-4 text-center">
+          <div class="feature-icon bg-purple-light rounded-circle mx-auto mb-3">
+            <i class="bi bi-bar-chart-line-fill text-purple fs-3"></i>
+          </div>
+          <h5 class="fw-bold">BMI &amp; Health Dashboard</h5>
+          <p class="text-muted small">View your health at a glance — BMI calculator, daily progress, calorie balance, and macronutrient breakdown all in one dashboard.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">How It Works</h2>
+      <p class="text-muted">Get started in 3 simple steps</p>
+    </div>
+    <div class="row g-4 align-items-center">
+      <div class="col-md-4 text-center">
+        <div class="step-circle bg-primary text-white mx-auto mb-3">1</div>
+        <h5 class="fw-bold">Create Your Profile</h5>
+        <p class="text-muted small">Enter your age, weight, height, activity level, and health goals to personalize your experience.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="step-circle bg-primary text-white mx-auto mb-3">2</div>
+        <h5 class="fw-bold">Log Your Food</h5>
+        <p class="text-muted small">Upload food photos or search our database to log every meal and snack you eat during the day.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="step-circle bg-primary text-white mx-auto mb-3">3</div>
+        <h5 class="fw-bold">Get Insights</h5>
+        <p class="text-muted small">Receive personalized diet recommendations, disease risk assessments, and downloadable health reports.</p>
+      </div>
+    </div>
+    <div class="text-center mt-4">
+      <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-5">Start Your Health Journey</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+  <div class="container text-center">
+    <h3 class="fw-bold mb-3">Ready to take control of your health?</h3>
+    <p class="text-muted mb-4">Join today and start tracking your nutrition and health with AI-powered tools.</p>
+    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-3">Create Free Account</a>
+    <a href="{{ url_for('about') }}" class="btn btn-outline-secondary btn-lg">Learn More</a>
+  </div>
+</section>
+{% endblock %}
