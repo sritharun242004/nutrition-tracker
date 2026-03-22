@@ -1,6 +1,8 @@
 import os
 import json
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+load_dotenv()  # loads .env file locally; on Render uses dashboard env vars
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -16,12 +18,8 @@ from utils.nutrition_data import NUTRITION_DB, get_all_foods
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.secret_key = 'foodhealth2024secretkey!@#'
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    'postgresql://neondb_owner:npg_NtUXZqM0JIh7'
-    '@ep-falling-leaf-amtuw6e8-pooler.c-5.us-east-1.aws.neon.tech'
-    '/neondb?sslmode=require'
-)
+app.secret_key = os.environ.get('SECRET_KEY', 'foodhealth2024secretkey!@#')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,
     'connect_args': {'sslmode': 'require'}
